@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:cooked_beef" },
+    { "item": "minecraft:potato" },
+    { "item": "mrmod:tinny" }
+  ],
+  "result": {
+    "item": "mrmod:tinkan",
+    "count": 1
+  }
+}

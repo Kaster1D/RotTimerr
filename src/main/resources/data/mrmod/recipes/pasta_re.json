@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "mrmod:flour" },
+    { "item": "minecraft:water_bucket"},
+    { "item": "minecraft:egg"}
+  ],
+  "result": {
+    "item": "mrmod:pasta",
+    "count": 2
+  }
+}

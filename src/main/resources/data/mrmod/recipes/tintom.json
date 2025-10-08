@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "mrmod:tomato" },
+    { "item": "mrmod:tinny" }
+  ],
+  "result": {
+    "item": "mrmod:tinkantomato",
+    "count": 1
+  }
+}
