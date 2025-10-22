@@ -11,6 +11,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import net.kaster.mrmod.items.ChickenLegItem;
 
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS =
@@ -56,7 +57,7 @@ public class ModItems {
 
 
     public static final RegistryObject<Item> CHICKENLEG = ITEMS.register("chickenleg",
-            () -> new Item(new Item.Properties().food(ModFoods.CHICKENLEG)));
+            () -> new ChickenLegItem(new Item.Properties().food(ModFoods.CHICKENLEG)));
 
     public static final RegistryObject<Item> JAR = ITEMS.register("jar",
             () -> new Item(new Item.Properties()));
