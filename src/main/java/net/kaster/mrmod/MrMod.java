@@ -33,6 +33,7 @@ public class MrMod
 
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::addCreative);
 
         ModItems.register(modEventBus);
 

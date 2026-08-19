@@ -3,7 +3,6 @@ package net.kaster.mrmod.items;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.*;
@@ -11,27 +10,27 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FoodSpoilHandler {
 
     private static final String TAG_CREATED = "CreatedTime";
-    private static final long SPOIL_TIME_TICKS = 48000; // ~2 игровых дня
+    private static final long SPOIL_TIME_TICKS = 48000;
     private static final float BARREL_MULTIPLIER = 2.0F;
     private static final float CHEST_MULTIPLIER = 1.0F;
     private static final float TINKAN_MULTIPLIER = 5.0F;
-    private static final float TINKANFISH_MULTIPLIER = 5.0F;
-    private static final float TINKANCHICKEN_MULTIPLIER = 5.0F;
-    private static final float TINKANTOMATO_MULTIPLIER = 5.0F;
+
+    private static final int CONTAINER_SCAN_INTERVAL = 200;
+    private static final int CONTAINER_SCAN_RADIUS = 4;
 
     // =========================
-    // 🌡️ ПОРЧА В ИНВЕНТАРЕ ИГРОКА
+    // ПОРЧА В ИНВЕНТАРЕ ИГРОКА
     // =========================
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -55,45 +54,63 @@ public class FoodSpoilHandler {
     }
 
     // =========================
-    // 🌡️ ПОРЧА В СУНДУКАХ И БОЧКАХ
+    // ПОРЧА В СУНДУКАХ И БОЧКАХ
     // =========================
     @SubscribeEvent
-    public static void onBlockTick(BlockEvent.NeighborNotifyEvent event) {
-        Level level = (Level) event.getLevel();
-        if (level.isClientSide()) return;
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
 
-        BlockPos pos = event.getPos();
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity == null) return;
+        long tickCount = event.getServer().getTickCount();
+        if (tickCount % CONTAINER_SCAN_INTERVAL != 0) return;
 
+        for (ServerLevel level : event.getServer().getAllLevels()) {
+            for (Player player : level.players()) {
+                scanContainersNearPlayer(level, player);
+            }
+        }
+    }
+
+    private static void scanContainersNearPlayer(ServerLevel level, Player player) {
+        BlockPos playerPos = player.blockPosition();
         long gameTime = level.getGameTime();
-        float tempMultiplier = getTemperatureMultiplier(level, pos);
 
-        if (blockEntity instanceof ChestBlockEntity chest) {
-            processContainer(
-                    chest.getContainerSize(),
-                    chest::getItem,
-                    chest::setItem,
-                    gameTime,
-                    tempMultiplier,
-                    CHEST_MULTIPLIER
-            );
-            chest.setChanged();
-        } else if (blockEntity instanceof BarrelBlockEntity barrel) {
-            processContainer(
-                    barrel.getContainerSize(),
-                    barrel::getItem,
-                    barrel::setItem,
-                    gameTime,
-                    tempMultiplier,
-                    BARREL_MULTIPLIER
-            );
-            barrel.setChanged();
+        for (int dx = -CONTAINER_SCAN_RADIUS; dx <= CONTAINER_SCAN_RADIUS; dx++) {
+            for (int dy = -CONTAINER_SCAN_RADIUS; dy <= CONTAINER_SCAN_RADIUS; dy++) {
+                for (int dz = -CONTAINER_SCAN_RADIUS; dz <= CONTAINER_SCAN_RADIUS; dz++) {
+                    BlockPos pos = playerPos.offset(dx, dy, dz);
+                    BlockEntity blockEntity = level.getBlockEntity(pos);
+                    if (blockEntity == null) continue;
+
+                    float tempMultiplier = getTemperatureMultiplier(level, pos);
+
+                    if (blockEntity instanceof ChestBlockEntity chest) {
+                        processContainer(
+                                chest.getContainerSize(),
+                                chest::getItem,
+                                chest::setItem,
+                                gameTime,
+                                tempMultiplier,
+                                CHEST_MULTIPLIER
+                        );
+                        chest.setChanged();
+                    } else if (blockEntity instanceof BarrelBlockEntity barrel) {
+                        processContainer(
+                                barrel.getContainerSize(),
+                                barrel::getItem,
+                                barrel::setItem,
+                                gameTime,
+                                tempMultiplier,
+                                BARREL_MULTIPLIER
+                        );
+                        barrel.setChanged();
+                    }
+                }
+            }
         }
     }
 
     // =========================
-    // 🧊 ОБРАБОТКА КОНТЕЙНЕРОВ
+    // ОБРАБОТКА КОНТЕЙНЕРОВ
     // =========================
     private static void processContainer(
             int size,
@@ -122,18 +139,18 @@ public class FoodSpoilHandler {
     }
 
     // =========================
-    // 🌡️ ПОЛУЧЕНИЕ МУЛЬТИПЛИКАТОРА ТЕМПЕРАТУРЫ
+    // ПОЛУЧЕНИЕ МУЛЬТИПЛИКАТОРА ТЕМПЕРАТУРЫ
     // =========================
     private static float getTemperatureMultiplier(Level level, BlockPos pos) {
         float biomeTemp = level.getBiome(pos).value().getBaseTemperature();
-        if (biomeTemp < 0.15f) return 0.25f; // холод — замедляем
-        if (biomeTemp < 0.5f) return 0.75f; // прохладно
-        if (biomeTemp < 1.0f) return 1.0f; // норма
-        return 2.0f; // жара — ускоряем
+        if (biomeTemp < 0.15f) return 0.25f;
+        if (biomeTemp < 0.5f) return 0.75f;
+        if (biomeTemp < 1.0f) return 1.0f;
+        return 2.0f;
     }
 
     // =========================
-    // 🔧 ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+    // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
     // =========================
     private static void normalizeContainer(
             int size,
@@ -190,9 +207,6 @@ public class FoodSpoilHandler {
         if (item == ModItems.TINKAN.get() || item == ModItems.TINKANFISH.get()
                 || item == ModItems.TINKANCHICKEN.get() || item == ModItems.TINKANTOMATO.get()) {
             spoilTime *= TINKAN_MULTIPLIER;
-            if (item == ModItems.TINKANFISH.get()) spoilTime *= TINKANFISH_MULTIPLIER;
-            if (item == ModItems.TINKANCHICKEN.get()) spoilTime *= TINKANCHICKEN_MULTIPLIER;
-            if (item == ModItems.TINKANTOMATO.get()) spoilTime *= TINKANTOMATO_MULTIPLIER;
         }
         return spoilTime;
     }

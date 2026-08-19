@@ -4,8 +4,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.Item;
-import net.minecraftforge.event.entity.living.MobEffectEvent;
 
 public class ModFoods {
     public static final FoodProperties TINKAN = new FoodProperties.Builder().nutrition(10).meat()
@@ -39,9 +37,9 @@ public class ModFoods {
             .build();
 
     public static final FoodProperties JAMCHERRY = new FoodProperties.Builder()
-            .nutrition(4)        // сколько восстанавливает голода
-            .meat()              // еда съедается быстро
-            .saturationMod(0.4f) // коэффициент насыщения (0.8f = 80% от базового)
+            .nutrition(4)
+            .fast()
+            .saturationMod(0.4f)
             .build();
 
     public static final FoodProperties CHEESE = new FoodProperties.Builder().nutrition(2).fast()

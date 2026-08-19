@@ -1,6 +1,5 @@
 package net.kaster.mrmod.items;
 
-import com.google.common.util.concurrent.ClosingFuture;
 import net.kaster.mrmod.MrMod;
 import net.kaster.mrmod.block.ModBlocks;
 import net.kaster.mrmod.block.custom.TomatoItem;
