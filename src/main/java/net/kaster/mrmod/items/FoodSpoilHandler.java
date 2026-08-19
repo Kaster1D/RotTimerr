@@ -1,5 +1,6 @@
 package net.kaster.mrmod.items;
 
+import net.kaster.mrmod.config.ModConfig;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.event.TickEvent;
@@ -11,7 +12,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,13 +24,6 @@ import java.util.function.BiConsumer;
 public class FoodSpoilHandler {
 
     private static final String TAG_CREATED = "CreatedTime";
-    private static final long SPOIL_TIME_TICKS = 48000;
-    private static final float BARREL_MULTIPLIER = 2.0F;
-    private static final float CHEST_MULTIPLIER = 1.0F;
-    private static final float TINKAN_MULTIPLIER = 5.0F;
-
-    private static final int CONTAINER_SCAN_INTERVAL = 200;
-    private static final int CONTAINER_SCAN_RADIUS = 4;
 
     // =========================
     // ПОРЧА В ИНВЕНТАРЕ ИГРОКА
@@ -61,7 +57,8 @@ public class FoodSpoilHandler {
         if (event.phase != TickEvent.Phase.END) return;
 
         long tickCount = event.getServer().getTickCount();
-        if (tickCount % CONTAINER_SCAN_INTERVAL != 0) return;
+        int scanInterval = ModConfig.COMMON.containerScanInterval.get();
+        if (tickCount % scanInterval != 0) return;
 
         for (ServerLevel level : event.getServer().getAllLevels()) {
             for (Player player : level.players()) {
@@ -73,10 +70,11 @@ public class FoodSpoilHandler {
     private static void scanContainersNearPlayer(ServerLevel level, Player player) {
         BlockPos playerPos = player.blockPosition();
         long gameTime = level.getGameTime();
+        int scanRadius = ModConfig.COMMON.containerScanRadius.get();
 
-        for (int dx = -CONTAINER_SCAN_RADIUS; dx <= CONTAINER_SCAN_RADIUS; dx++) {
-            for (int dy = -CONTAINER_SCAN_RADIUS; dy <= CONTAINER_SCAN_RADIUS; dy++) {
-                for (int dz = -CONTAINER_SCAN_RADIUS; dz <= CONTAINER_SCAN_RADIUS; dz++) {
+        for (int dx = -scanRadius; dx <= scanRadius; dx++) {
+            for (int dy = -scanRadius; dy <= scanRadius; dy++) {
+                for (int dz = -scanRadius; dz <= scanRadius; dz++) {
                     BlockPos pos = playerPos.offset(dx, dy, dz);
                     BlockEntity blockEntity = level.getBlockEntity(pos);
                     if (blockEntity == null) continue;
@@ -90,7 +88,7 @@ public class FoodSpoilHandler {
                                 chest::setItem,
                                 gameTime,
                                 tempMultiplier,
-                                CHEST_MULTIPLIER
+                                (float) ModConfig.COMMON.chestMultiplier.get().doubleValue()
                         );
                         chest.setChanged();
                     } else if (blockEntity instanceof BarrelBlockEntity barrel) {
@@ -100,7 +98,7 @@ public class FoodSpoilHandler {
                                 barrel::setItem,
                                 gameTime,
                                 tempMultiplier,
-                                BARREL_MULTIPLIER
+                                (float) ModConfig.COMMON.barrelMultiplier.get().doubleValue()
                         );
                         barrel.setChanged();
                     }
@@ -128,6 +126,7 @@ public class FoodSpoilHandler {
 
             Item item = stack.getItem();
             if (!isSubjectToSpoil(item)) continue;
+            if (isBlacklisted(item)) continue;
 
             long created = getOrSetCreated(stack, gameTime);
             long spoilTime = (long) (getSpoilTime(item) * containerMultiplier / tempMultiplier);
@@ -143,10 +142,10 @@ public class FoodSpoilHandler {
     // =========================
     private static float getTemperatureMultiplier(Level level, BlockPos pos) {
         float biomeTemp = level.getBiome(pos).value().getBaseTemperature();
-        if (biomeTemp < 0.15f) return 0.25f;
-        if (biomeTemp < 0.5f) return 0.75f;
-        if (biomeTemp < 1.0f) return 1.0f;
-        return 2.0f;
+        if (biomeTemp < 0.15f) return (float) ModConfig.COMMON.temperatureCold.get().doubleValue();
+        if (biomeTemp < 0.5f) return (float) ModConfig.COMMON.temperatureCool.get().doubleValue();
+        if (biomeTemp < 1.0f) return (float) ModConfig.COMMON.temperatureNormal.get().doubleValue();
+        return (float) ModConfig.COMMON.temperatureHot.get().doubleValue();
     }
 
     // =========================
@@ -202,13 +201,31 @@ public class FoodSpoilHandler {
         return true;
     }
 
+    private static boolean isBlacklisted(Item item) {
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+        if (id == null) return false;
+        return ModConfig.getBlacklist().contains(id.toString());
+    }
+
     private static long getSpoilTime(Item item) {
-        long spoilTime = SPOIL_TIME_TICKS;
+        long baseSpoilTime = ModConfig.COMMON.baseSpoilTicks.get();
+
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+        if (id != null) {
+            String idStr = id.toString();
+
+            Float customMultiplier = ModConfig.getCustomMultipliers().get(idStr);
+            if (customMultiplier != null) {
+                return (long) (baseSpoilTime * customMultiplier);
+            }
+        }
+
         if (item == ModItems.TINKAN.get() || item == ModItems.TINKANFISH.get()
                 || item == ModItems.TINKANCHICKEN.get() || item == ModItems.TINKANTOMATO.get()) {
-            spoilTime *= TINKAN_MULTIPLIER;
+            return (long) (baseSpoilTime * ModConfig.COMMON.tinkanMultiplier.get().doubleValue());
         }
-        return spoilTime;
+
+        return baseSpoilTime;
     }
 
     private static long getOrSetCreated(ItemStack stack, long now) {

@@ -2,6 +2,7 @@ package net.kaster.mrmod;
 
 import com.mojang.logging.LogUtils;
 import net.kaster.mrmod.block.ModBlocks;
+import net.kaster.mrmod.config.ModConfig;
 import net.kaster.mrmod.items.ModCreativeModTabs;
 import net.kaster.mrmod.items.ModItems;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -10,7 +11,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -31,6 +34,7 @@ public class MrMod
 
         ModBlocks.register(modEventBus);
 
+        ModLoadingContext.get().registerConfig(Type.COMMON, ModConfig.COMMON_SPEC, "mrmod.toml");
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::addCreative);
@@ -39,12 +43,7 @@ public class MrMod
 
         ModCreativeModTabs.register(modEventBus);
 
-
-
-
         MinecraftForge.EVENT_BUS.register(this);
-
-
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
