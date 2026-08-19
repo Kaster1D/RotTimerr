@@ -87,6 +87,38 @@ Feel free to include Rot Timer in your modpack! Just make sure to:
 - Don't claim it as your own creation
 - Always read the changelogs — breaking changes may occur between versions
 
+### Configuration
+
+A `Rottimer.toml` config file is generated on first launch. Customize everything:
+
+```toml
+[general]
+base_spoil_ticks = 48000        # Ticks before food spoils
+container_scan_interval = 200   # How often to scan containers
+container_scan_radius = 4       # Scan radius around player
+
+[multipliers]
+barrel = 2.0    # Barrel storage multiplier
+chest = 1.0     # Chest storage multiplier
+tinkan = 5.0    # Canned food multiplier
+
+[temperature]
+cold = 4.0      # Cold biomes (tundra, snow)
+cool = 1.33     # Cool biomes (taiga)
+normal = 1.0    # Normal biomes
+hot = 2.0       # Hot biomes (desert, nether)
+
+# Custom multipliers for modded food: "modid:itemid=multiplier"
+[custom_items]
+"farmersdelight:ham" = 0.8
+"farmersdelight:dried_kelp" = 3.0
+
+# Items that never spoil: "modid:itemid"
+[blacklist]
+"minecraft:golden_apple" = true
+"minecraft:enchanted_golden_apple" = true
+```
+
 ---
 
 ## Links
