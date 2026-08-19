@@ -34,7 +34,7 @@ public class MrMod
 
         ModBlocks.register(modEventBus);
 
-        ModLoadingContext.get().registerConfig(Type.COMMON, ModConfig.COMMON_SPEC, "mrmod.toml");
+        ModLoadingContext.get().registerConfig(Type.COMMON, ModConfig.COMMON_SPEC, "Rottimer.toml");
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::addCreative);
