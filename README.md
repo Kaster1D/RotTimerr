@@ -124,6 +124,4 @@ hot = 2.0       # Hot biomes (desert, nether)
 ## Links
 
 - [Modrinth](https://modrinth.com/mod/rot-timer)
-- [Discord](https://discord.gg/JdJsNRtDhd)
-- [YouTube](https://www.youtube.com/@Kaster__64)
 - [Ko-fi](https://ko-fi.com/kaster_64)
