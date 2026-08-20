@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mrmod",
+  "version": "${version}",
+  "name": "Rot Timer",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_authors}"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/rot-timer",
+    "sources": "https://github.com/Kaster1D/RotTimerr"
+  },
+  "license": "${mod_license}",
+  "icon": "assets/mrmod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.kaster.mrmod.RotTimerMod"
+    ],
+    "client": [
+      "net.kaster.mrmod.RotTimerClient"
+    ]
+  },
+  "mixins": [],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "1.21.1",
+    "java": ">=21"
+  }
+}

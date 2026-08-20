@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "mrmod:cheese_bucket" }
+  ],
+  "result": {
+    "id": "mrmod:cheese",
+    "count": 3
+  }
+}

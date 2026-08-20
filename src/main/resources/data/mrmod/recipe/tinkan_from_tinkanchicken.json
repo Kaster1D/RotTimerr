@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "minecraft:cooked_chicken" },
+    { "item": "minecraft:potato" },
+    { "item": "mrmod:tinny" }
+  ],
+  "result": {
+    "id": "mrmod:tinkanchicken",
+    "count": 1
+  }
+}
