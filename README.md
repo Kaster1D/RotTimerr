@@ -1,5 +1,11 @@
 # Rot Timer
 
+![Forge](https://img.shields.io/badge/Forge-47.4.0-FF7000?style=for-the-badge&logo=minecraftforge&logoColor=white)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=for-the-badge&logo=minecraft&logoColor=white)
+![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+[![Modrinth](https://img.shields.io/badge/Modrinth-Available-1BD96A?style=for-the-badge&logo=modrinth&logoColor=white)](https://modrinth.com/mod/rot-timer)
+
 A Minecraft Forge mod that adds realistic food spoilage, barrel storage bonuses, and long-lasting canned stew for a deeper survival experience.
 
 **Minecraft:** 1.20.1 | **Forge:** 47.4.0 | **License:** MIT
